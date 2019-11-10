@@ -16,10 +16,10 @@ pequena documentação das funcionalidades necessárias no projeto. Os desenvolvedo
 | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **/users/**<br>(criar um novo usuário) | <span style="color:green">**POST**</span>  | email \*<br>name \*<br>password \*  |   |   |
 | **/login**<br>(autenticar com um usuário)  |  <span style="color:green">**POST**</span> | email \*<br>password \*  | **token**<br>iduser<br>email<br>name<br>drink_counter |   |
-|** /users/:iduser**<br>(obter um usuário) | <span style="color:blue">**GET**</span>  |  | iduser<br>name<br>email<br>drink_counter | token \* |
+|**/users/:iduser**<br>(obter um usuário) | <span style="color:blue">**GET**</span>  |  | iduser<br>name<br>email<br>drink_counter | token \* |
 | **/users/**<br>(obter a lista de usuários)  | <span style="color:blue">**GET**</span>  |   | (array de usuários)  | token \*  |
-|** /users/:iduser**<br>(editar o seu próprio usuário)  | <span style="color:orange">**PUT**</span> | email<br>name<br>password  |   | token \*  |
-|** /users/:iduser**<br>(apagar o seu próprio usuário)  |   <span style="color:red">**DELETE**</span> |   |   | token \*  |
+|**/users/:iduser**<br>(editar o seu próprio usuário)  | <span style="color:orange">**PUT**</span> | email<br>name<br>password  |   | token \*  |
+|**/users/:iduser**<br>(apagar o seu próprio usuário)  |   <span style="color:red">**DELETE**</span> |   |   | token \*  |
 | **/users/:iduser/drink**<br>(incrementar o contador de quantas vezes bebeu água)  | <span style="color:green">**POST**</span> | drink_ml (int)  |  iduser<br>email<br>name<br>drink_counter | token \*  |
 
 \* Campos obrigatórios
