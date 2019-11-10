@@ -36,7 +36,7 @@ class Connection
 
             return $this->queryExecute('USE `mosylechallenge;`');
         } catch (Exception $e) {
-            throw new Exception("Database PDOection failed: '{$e->getMessage()}'");
+            throw new Exception("Database connection failed: '{$e->getMessage()}'");
         }
     }
 
