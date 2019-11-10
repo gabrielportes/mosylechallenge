@@ -34,7 +34,7 @@ class Connection
             $schema = file_get_contents('schema.sql');
             $this->queryExecute($schema);
 
-            return $this->queryExecute('USE `mosylechallenge;`');
+            return $this->queryExecute('USE `mosylechallenge`;');
         } catch (Exception $e) {
             throw new Exception("Database connection failed: '{$e->getMessage()}'");
         }
@@ -49,7 +49,9 @@ class Connection
      */
     public function queryExecute(string $query): bool
     {
-        $this->PDO->beginTransaction();
+        if (!$this->PDO->inTransaction()) {
+            $this->PDO->beginTransaction();
+        }
 
         try {
             $sth = $this->PDO->prepare($query);
@@ -76,7 +78,9 @@ class Connection
      */
     public function queryFetch(string $query): array
     {
-        $this->PDO->beginTransaction();
+        if (!$this->PDO->inTransaction()) {
+            $this->PDO->beginTransaction();
+        }
 
         try {
             $sth = $this->PDO->prepare($query);
