@@ -13,7 +13,7 @@ class Connection
     public function __construct()
     {
         $dsn = "mysql:host={$this->host}:{$this->port};dbname={$this->dbname}";
-        
+
         try {
             $this->PDO = new PDO($dsn, $this->user, $this->password);
         } catch (Exception $e) {
@@ -53,7 +53,11 @@ class Connection
 
         try {
             $sth = $this->PDO->prepare($query);
-            $sth->execute();
+
+            if (!$sth->execute()) {
+                throw new Exception("Invalid query.");
+            }
+
             $this->PDO->commit();
 
             return true;
