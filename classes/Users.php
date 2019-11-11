@@ -147,7 +147,7 @@ class Users
     }
 
     /**
-     * Authenticate in the system and returns the user data
+     * Sign in to the system and returns the user data
      *
      * @param  string $email
      * @param  string $password
