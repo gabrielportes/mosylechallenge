@@ -18,7 +18,32 @@ class Api
 
     public function usersGet()
     {
-        echo 'usersGet';
+        try {
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
+
+            if (empty($token)) {
+                throw new Exception('Token is necessary', 403);
+            }
+
+            $users = new Users();
+
+            if (!$users->findByToken($token)) {
+                throw new Exception('Invalid token', 401);
+            }
+
+            if (!empty($iduser)) {
+                $response = $users->findById($iduser);
+            } else {
+                $response = $users->findAll();
+            }
+
+            if ($response) {
+                $this->response(200, 'Success', $response);
+            }
+        } catch (Exception $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
     }
 
     /**

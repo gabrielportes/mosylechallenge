@@ -122,6 +122,30 @@ class Users
     }
 
     /**
+     * Find a user by his token
+     *
+     * @param  string $token
+     *
+     * @return array
+     */
+    public function findByToken(string $token): array
+    {
+        $query = "SELECT 
+            `iduser`,
+            `name`,
+            `email`,
+            `drink_counter`,
+            `token`
+        FROM `users` 
+        WHERE `token` = '{$token}';";
+
+        $result = (new Connection())->queryFetch($query);
+        $result = reset($result);
+
+        return is_array($result) ? $result : [];
+    }
+
+    /**
      * Find a user by his email
      *
      * @param  string $email
