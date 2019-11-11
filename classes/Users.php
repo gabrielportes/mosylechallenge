@@ -14,9 +14,14 @@ class Users
     {
         $this->email = $email;
         $this->name = $name;
-        $this->password = sha1($password);
+        $this->password = $this->passwordToHash($password);
     }
 
+    /**
+     * Creates a new user in the system
+     *
+     * @return bool
+     */
     public function create(): bool
     {
         if ($this->emailExists($this->email)) {
@@ -54,16 +59,31 @@ class Users
         return boolval($this->findByEmail($email));
     }
 
+    /**
+     * Generates and sets a token
+     *
+     * @return void
+     */
     private function setToken()
     {
         $this->token = $this->generateToken();
     }
 
+    /**
+     * Generates a sha1 hash token for a user, so it can be used to autentication while using API requests
+     *
+     * @return string
+     */
     private function generateToken(): string
     {
         return sha1("{$this->email}{$this->password}{$this->salt}");
     }
 
+    /**
+     * Find all users
+     *
+     * @return array
+     */
     public function findAll(): array
     {
         $query = "SELECT 
@@ -78,6 +98,13 @@ class Users
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * Find a user by his id 
+     *
+     * @param  int $iduser
+     *
+     * @return array
+     */
     public function findById(int $iduser): array
     {
         $query = "SELECT 
@@ -94,11 +121,16 @@ class Users
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * Find a user by his email
+     *
+     * @param  string $email
+     *
+     * @return array
+     */
     public function findByEmail(string $email): array
     {
-        if (!$this->isEmailFormatValid($email)) {
-            throw new Exception('Invalid email address format.', 500);
-        }
+        $this->isEmailFormatValid($email);
 
         $query = "SELECT 
             `iduser`,
@@ -114,9 +146,70 @@ class Users
         return is_array($result) ? $result : [];
     }
 
-    private function isEmailFormatValid(string $email): bool
+    /**
+     * Authenticate in the system and returns the user data
+     *
+     * @param  string $email
+     * @param  string $password
+     *
+     * @return array
+     */
+    public function login(string $email, string $password): array
     {
+        !$this->isEmailFormatValid($email);
+
+        if (!$this->emailExists($email)) {
+            throw new Exception('User not exists', 401);
+        }
+
+        $password = $this->passwordToHash($password);
+
+        $query = "SELECT 
+            `iduser`,
+            `name`,
+            `email`,
+            `drink_counter`, 
+            `token`
+        FROM `users` 
+        WHERE `email` = '{$email}'
+        AND `password` = '{$password}';";
+
+        $result = (new Connection())->queryFetch($query);
+        $result = reset($result);
+
+        if (!is_array($result)) {
+            throw new Exception('Invalid password', 401);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if the email format is valid
+     *
+     * @param  string $email
+     * @param  bool $throwable
+     *
+     * @return bool
+     */
+    public function isEmailFormatValid(string $email, bool $throwable = true): bool
+    {
+        if ($throwable && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception('Invalid email address format.', 500);
+        }
+
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
 
+    /**
+     * Converts a password to a sha1 hash
+     *
+     * @param  string $password
+     *
+     * @return string
+     */
+    private function passwordToHash(string $password): string
+    {
+        return sha1($password);
+    }
 }
