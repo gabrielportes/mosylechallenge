@@ -16,6 +16,11 @@ class Api
         $this->header = $header;
     }
 
+    /**
+     * Find for users in the system
+     *
+     * @return void
+     */
     public function usersGet()
     {
         try {
@@ -68,9 +73,64 @@ class Api
         }
     }
 
+    /**
+     * Update users informations by his id
+     *
+     * @return void
+     */
     public function usersPut(): void
     {
-        echo 'usersPut';
+        try {
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
+
+            if (empty($token)) {
+                throw new Exception('Token is necessary', 403);
+            }
+
+            $users = new Users();
+
+            if (!$users->findByToken($token)) {
+                throw new Exception('Invalid token', 401);
+            }
+
+            if (empty($iduser)) {
+                throw new Exception('Iduser is necesary', 403);
+            }
+
+            $user = $users->findById($iduser, true);
+
+            if ($user) {
+                if ($token != $user['token']) {
+                    throw new Exception('Token does not belong to user', 403);
+                }
+
+                $parameters = [];
+                if (isset($this->body['name'])) {
+                    $parameters['name'] = $this->body['name'];
+                }
+
+                if (isset($this->body['email'])) {
+                    if ($users->emailExists($this->body['email'])) {
+                        throw new Exception("Email already taken.", 500);
+                    }
+
+                    $parameters['email'] = $this->body['email'];
+                }
+
+                if (isset($this->body['password'])) {
+                    $parameters['password'] = $this->body['password'];
+                }
+
+                $users->update($iduser, $parameters);
+
+                $userUpdated = $users->findById($iduser, true);
+
+                $this->response(200, 'Success', $userUpdated);
+            }
+        } catch (Exception $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
     }
 
     public function usersDelete(): void

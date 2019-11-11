@@ -91,7 +91,8 @@ class Users
             `name`,
             `email`,
             `drink_counter` 
-        FROM `users`;";
+        FROM 
+            `users`;";
 
         $result = (new Connection())->queryFetch($query);
 
@@ -101,19 +102,27 @@ class Users
     /**
      * Find a user by his id 
      *
-     * @param  int $iduser
+     * @param  int  $iduser
+     * @param  bool $showToken
      *
      * @return array
      */
-    public function findById(int $iduser): array
+    public function findById(int $iduser, bool $showToken = false): array
     {
+        $columns = '';
+        if ($showToken) {
+            $columns = ',`token`';
+        }
+
         $query = "SELECT 
             `iduser`,
             `name`,
             `email`,
-            `drink_counter` 
-        FROM `users` 
-        WHERE `iduser` = '{$iduser}';";
+            `drink_counter`{$columns}
+        FROM 
+            `users` 
+        WHERE 
+            `iduser` = {$iduser};";
 
         $result = (new Connection())->queryFetch($query);
         $result = reset($result);
@@ -136,8 +145,10 @@ class Users
             `email`,
             `drink_counter`,
             `token`
-        FROM `users` 
-        WHERE `token` = '{$token}';";
+        FROM 
+            `users` 
+        WHERE 
+            `token` = '{$token}';";
 
         $result = (new Connection())->queryFetch($query);
         $result = reset($result);
@@ -161,8 +172,10 @@ class Users
             `name`,
             `email`,
             `drink_counter` 
-        FROM `users` 
-        WHERE `email` = '{$email}';";
+        FROM 
+            `users` 
+        WHERE 
+            `email` = '{$email}';";
 
         $result = (new Connection())->queryFetch($query);
         $result = reset($result);
@@ -194,9 +207,11 @@ class Users
             `email`,
             `drink_counter`, 
             `token`
-        FROM `users` 
-        WHERE `email` = '{$email}'
-        AND `password` = '{$password}';";
+        FROM 
+            `users` 
+        WHERE 
+            `email` = '{$email}'
+            AND `password` = '{$password}';";
 
         $result = (new Connection())->queryFetch($query);
         $result = reset($result);
@@ -235,5 +250,45 @@ class Users
     private function passwordToHash(string $password): string
     {
         return sha1($password);
+    }
+
+    /**
+     * Update users informations
+     *
+     * @param  int   $iduser
+     * @param  array $parameters
+     *
+     * @return bool
+     */
+    public function update(int $iduser, array $parameters): bool
+    {
+        $needNewToken = false;
+        $update = '';
+        foreach ($parameters as $key => $value) {
+            if ($key == 'password') {
+                $this->password = $this->passwordToHash($value);
+                $value = $this->password;
+                $needNewToken = true;
+            } else if ($key == 'email') {
+                $needNewToken = true;
+            }
+
+            $update .= "`{$key}` = '{$value}', ";
+        }
+
+        if ($needNewToken) {
+            $update .= "`token` = '{$this->generateToken()}', ";
+        }
+
+        $update = substr_replace($update, ' ', -2);
+
+        $query = "UPDATE
+            `users`
+        SET
+            {$update}
+        WHERE 
+            `iduser` = {$iduser};";
+
+        return (new Connection())->queryExecute($query);
     }
 }
