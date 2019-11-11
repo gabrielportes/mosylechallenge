@@ -34,4 +34,8 @@ switch ($requestMethod) {
     case 'DELETE':
         $api->usersDelete();
         break;
+
+    default:
+        $api->response(500, 'Requisition method not implemented');
+        break;
 }
