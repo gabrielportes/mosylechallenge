@@ -31,12 +31,12 @@ class Connection
         try {
             $dsn = "mysql:host={$this->host}:{$this->port};";
             $this->PDO = new PDO($dsn, $this->user, $this->password);
-            $schema = file_get_contents('schema.sql');
+            $schema = file_get_contents('../schema.sql');
             $this->queryExecute($schema);
 
             return $this->queryExecute('USE `mosylechallenge`;');
         } catch (Exception $e) {
-            throw new Exception("Database connection failed: '{$e->getMessage()}'");
+            throw new Exception("Database connection failed: '{$e->getMessage()}'", 500);
         }
     }
 
@@ -57,7 +57,7 @@ class Connection
             $sth = $this->PDO->prepare($query);
 
             if (!$sth->execute()) {
-                throw new Exception("Invalid query.");
+                throw new Exception("Invalid query.", 500);
             }
 
             $this->PDO->commit();
@@ -65,7 +65,7 @@ class Connection
             return true;
         } catch (Exception $e) {
             $this->PDO->rollBack();
-            throw new Exception("Query failed to execute: '{$e->getMessage()}'");
+            throw new Exception("Query failed to execute: '{$e->getMessage()}'", 500);
         }
     }
 
@@ -91,7 +91,7 @@ class Connection
             return $result;
         } catch (Exception $e) {
             $this->PDO->rollBack();
-            throw new Exception("Query failed to fetch: '{$e->getMessage()}'");
+            throw new Exception("Query failed to fetch: '{$e->getMessage()}'", 500);
         }
     }
 }
