@@ -19,20 +19,8 @@ $class = array_pop($uri);
 $api = new Api($requestMethod, $body, $header);
 
 switch ($requestMethod) {
-    case 'GET':
-        $api->usersGet();
-        break;
-
     case 'POST':
-        $api->usersPost();
-        break;
-
-    case 'PUT':
-        $api->usersPut();
-        break;
-
-    case 'DELETE':
-        $api->usersDelete();
+        $api->loginPost();
         break;
 
     default:

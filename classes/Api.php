@@ -5,8 +5,6 @@ require_once('Users.php');
 
 class Api
 {
-    private $request;
-    private $class;
     private $method;
     private $body;
     private $header;
@@ -23,7 +21,12 @@ class Api
         echo 'usersGet';
     }
 
-    public function usersPost()
+    /**
+     * Sign up a new user to the system
+     *
+     * @return void
+     */
+    public function usersPost(): void
     {
         try {
             $email = $this->body['email'];
@@ -33,31 +36,56 @@ class Api
             $response = (new Users($email, $name, $password))->create();
 
             if ($response) {
-                echo $this->response(200, 'Success');
+                $this->response(200, 'Success');
             }
         } catch (Exception $e) {
-            echo $this->response($e->getCode(), $e->getMessage());
+            $this->response($e->getCode(), $e->getMessage());
         }
     }
 
-    public function usersPut()
+    public function usersPut(): void
     {
         echo 'usersPut';
     }
 
-    public function usersDelete()
+    public function usersDelete(): void
     {
         echo 'usersDelete';
     }
 
-    public function loginPost()
+    /**
+     * Sign in to the system
+     *
+     * @return void
+     */
+    public function loginPost(): void
     {
-        echo 'loginPost';
+        try {
+            $email = $this->body['email'];
+            $password = $this->body['password'];
+
+            $response = (new Users())->login($email, $password);
+
+            if ($response) {
+                $this->response(200, 'Success', $response);
+            }
+        } catch (Exception $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
     }
 
-    public function response(int $status, string $msg = '', array $data = []): string
+    /**
+     * Sends a response
+     *
+     * @param  int $status HTTP RESPONSE CODE
+     * @param  string $msg
+     * @param  array $data
+     *
+     * @return void
+     */
+    public function response(int $status, string $msg = '', array $data = []): void
     {
-        return json_encode([
+        echo json_encode([
             'status' => $status,
             'msg' => $msg,
             'data' => $data
