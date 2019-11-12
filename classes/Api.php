@@ -247,7 +247,7 @@ class Api
                 throw new Exception('Invalid token', 401);
             }
 
-            $response = Logs::getRanking();
+            $response = Logs::getTodayRanking();
 
             if ($response) {
                 $this->response(200, 'Success', $response);
