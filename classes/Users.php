@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL ^ E_NOTICE);
 require_once('Connection.php');
+require_once('Logs.php');
 class Users
 {
     private $name;
@@ -384,6 +385,8 @@ class Users
         WHERE 
             `iduser` = {$iduser};";
 
-        return (new Connection())->queryExecute($query);
+        (new Connection())->queryExecute($query);
+
+        return Logs::set($iduser, $drink_ml);
     }
 }

@@ -57,7 +57,7 @@ class Connection
             $sth = $this->PDO->prepare($query);
 
             if (!$sth->execute()) {
-                throw new Exception("Invalid query.", 500);
+                throw new Exception('Invalid query.', 500);
             }
 
             $this->PDO->commit();
