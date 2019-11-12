@@ -1,4 +1,5 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once('../classes/Api.php');
@@ -24,6 +25,6 @@ switch ($requestMethod) {
         break;
 
     default:
-        $api->response(500, 'Requisition method not implemented');
+        $api->response(501, 'Requisition method not implemented');
         break;
 }

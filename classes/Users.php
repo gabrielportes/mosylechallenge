@@ -1,6 +1,6 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 require_once('Connection.php');
-
 class Users
 {
     private $name;
@@ -25,7 +25,7 @@ class Users
     public function create(): bool
     {
         if ($this->emailExists($this->email)) {
-            throw new Exception("Email already taken.", 500);
+            throw new Exception('Email already taken.', 500);
         }
 
         $this->setToken();
@@ -127,7 +127,11 @@ class Users
         $result = (new Connection())->queryFetch($query);
         $result = reset($result);
 
-        return is_array($result) ? $result : [];
+        if (!$result) {
+            throw new Exception('User not found', 404);
+        }
+
+        return $result;
     }
 
     /**
@@ -193,10 +197,10 @@ class Users
      */
     public function login(string $email, string $password): array
     {
-        !$this->isEmailFormatValid($email);
+        $this->isEmailFormatValid($email);
 
         if (!$this->emailExists($email)) {
-            throw new Exception('User not exists', 401);
+            throw new Exception('User not found', 404);
         }
 
         $password = $this->passwordToHash($password);
@@ -286,6 +290,77 @@ class Users
             `users`
         SET
             {$update}
+        WHERE 
+            `iduser` = {$iduser};";
+
+        return (new Connection())->queryExecute($query);
+    }
+
+    /**
+     * Set parameters to use on Put action
+     *
+     * @param  array $body
+     *
+     * @return array
+     */
+    public function setParameters(array $body): array
+    {
+        $parameters = [];
+        if (isset($body['name'])) {
+            $parameters['name'] = $body['name'];
+        }
+
+        if (isset($body['email'])) {
+            if ($this->emailExists($body['email'])) {
+                throw new Exception('Email already taken.', 500);
+            }
+
+            $parameters['email'] = $body['email'];
+        }
+
+        if (isset($body['password'])) {
+            $parameters['password'] = $body['password'];
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * Check if token belongs to a user
+     *
+     * @param  string $token
+     * @param  int    $iduser
+     *
+     * @return bool
+     */
+    public function isTokenFromUser(string $token, int $iduser): bool
+    {
+        $user = $this->findById($iduser, true);
+
+        if (!$this->findByToken($token)) {
+            throw new Exception('Invalid token', 401);
+        }
+
+        if ($token != $user['token']) {
+            throw new Exception('Token does not belong to user', 403);
+        }
+
+
+        return true;
+    }
+
+    /**
+     * Deletes a user from the system
+     *
+     * @param  int $iduser
+     *
+     * @return bool
+     */
+    public function delete(int $iduser): bool
+    {
+        $query = "DELETE
+        FROM
+            `users`
         WHERE 
             `iduser` = {$iduser};";
 

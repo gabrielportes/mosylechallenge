@@ -1,6 +1,6 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 header('Content-Type: application/json; charset=utf-8');
-
 require_once('Users.php');
 
 class Api
@@ -24,8 +24,13 @@ class Api
     public function usersGet()
     {
         try {
-            $iduser = $this->body['iduser'];
-            $token = $this->header['token'];
+            if (isset($this->body['iduser'])) {
+                $iduser = $this->body['iduser'];
+            }
+
+            if (isset($this->header['token'])) {
+                $token = $this->header['token'];
+            }
 
             if (empty($token)) {
                 throw new Exception('Token is necessary', 403);
@@ -46,7 +51,7 @@ class Api
             if ($response) {
                 $this->response(200, 'Success', $response);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
     }
@@ -59,16 +64,24 @@ class Api
     public function usersPost(): void
     {
         try {
-            $email = $this->body['email'];
-            $name = $this->body['name'];
-            $password = $this->body['password'];
+            if (isset($this->body['email'])) {
+                $email = $this->body['email'];
+            }
+
+            if (isset($this->body['name'])) {
+                $name = $this->body['name'];
+            }
+
+            if (isset($this->body['password'])) {
+                $password = $this->body['password'];
+            }
 
             $response = (new Users($email, $name, $password))->create();
 
             if ($response) {
-                $this->response(200, 'Success');
+                $this->response(201, 'Created successfully');
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
     }
@@ -81,61 +94,64 @@ class Api
     public function usersPut(): void
     {
         try {
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
+            }
+
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
+            }
+
             $iduser = $this->body['iduser'];
             $token = $this->header['token'];
 
-            if (empty($token)) {
-                throw new Exception('Token is necessary', 403);
-            }
-
             $users = new Users();
 
-            if (!$users->findByToken($token)) {
-                throw new Exception('Invalid token', 401);
-            }
+            $users->isTokenFromUser($token, $iduser);
 
-            if (empty($iduser)) {
-                throw new Exception('Iduser is necesary', 403);
-            }
+            $parameters = $users->setParameters($this->body);
 
-            $user = $users->findById($iduser, true);
+            $users->update($iduser, $parameters);
 
-            if ($user) {
-                if ($token != $user['token']) {
-                    throw new Exception('Token does not belong to user', 403);
-                }
+            $userUpdated = $users->findById($iduser, true);
 
-                $parameters = [];
-                if (isset($this->body['name'])) {
-                    $parameters['name'] = $this->body['name'];
-                }
-
-                if (isset($this->body['email'])) {
-                    if ($users->emailExists($this->body['email'])) {
-                        throw new Exception("Email already taken.", 500);
-                    }
-
-                    $parameters['email'] = $this->body['email'];
-                }
-
-                if (isset($this->body['password'])) {
-                    $parameters['password'] = $this->body['password'];
-                }
-
-                $users->update($iduser, $parameters);
-
-                $userUpdated = $users->findById($iduser, true);
-
-                $this->response(200, 'Success', $userUpdated);
-            }
-        } catch (Exception $e) {
+            $this->response(200, 'Updated successfully', $userUpdated);
+        } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
     }
 
+    /**
+     * Deletes a user from the system
+     *
+     * @return void
+     */
     public function usersDelete(): void
     {
-        echo 'usersDelete';
+        try {
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
+            }
+
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
+            }
+
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
+
+            $users = new Users();
+
+            $users->isTokenFromUser($token, $iduser);
+
+            $userDeleted = $users->findById($iduser, true);
+
+            $users->delete($iduser);
+
+            $this->response(200, 'Deleted successfully', $userDeleted);
+        } catch (Throwable $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -146,6 +162,14 @@ class Api
     public function loginPost(): void
     {
         try {
+            if (empty($this->body['email'])) {
+                throw new Exception('Precondition Required: required request body content is missing "email"', 428);
+            }
+
+            if (empty($this->body['password'])) {
+                throw new Exception('Precondition Required: required request body content is missing "password"', 428);
+            }
+
             $email = $this->body['email'];
             $password = $this->body['password'];
 
@@ -154,7 +178,7 @@ class Api
             if ($response) {
                 $this->response(200, 'Success', $response);
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
     }
