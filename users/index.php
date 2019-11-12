@@ -5,8 +5,8 @@ header('Content-Type: application/json; charset=utf-8');
 require_once('../classes/Api.php');
 
 $requestMethod = strtoupper($_SERVER['REQUEST_METHOD']);
-$body = json_decode(file_get_contents('php://input'), 1);
-$header = getallheaders();
+$body = json_decode(file_get_contents('php://input'), 1) ?? [];
+$header = getallheaders() ?? [];
 
 $uri = array_filter(
     explode('/', $_SERVER['REQUEST_URI']),
@@ -14,8 +14,6 @@ $uri = array_filter(
         return !empty($elem);
     }
 );
-
-$class = array_pop($uri);
 
 $api = new Api($requestMethod, $body, $header);
 
