@@ -33,4 +33,32 @@ class Logs
 
         return (new Connection())->queryExecute($query);
     }
+
+    /**
+     * Gets the entire drink history from a user
+     *
+     * @param  int $iduser
+     *
+     * @return array
+     */
+    public static function getUserHistory(int $iduser): array
+    {
+        $query = "SELECT
+            `users`.`iduser`,
+            `users`.`name`,
+            `users`.`email`,
+            `logs`.`drink_ml`,
+            `logs`.`date`
+        FROM
+            `users`
+        LEFT JOIN
+            `logs`
+            ON `users`.`iduser` = `logs`.`iduser`
+        WHERE
+            `users`.`iduser` = {$iduser};";
+
+        $result = (new Connection())->queryFetch($query);
+
+        return is_array($result) ? $result : [];
+    }
 }

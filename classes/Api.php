@@ -2,6 +2,7 @@
 error_reporting(E_ALL ^ E_NOTICE);
 header('Content-Type: application/json; charset=utf-8');
 require_once('Users.php');
+require_once('Logs.php');
 
 class Api
 {
@@ -154,6 +155,11 @@ class Api
         }
     }
 
+    /**
+     * Changes how many times and how much water a user drinked
+     *
+     * @return void
+     */
     public function usersDrink(): void
     {
         try {
@@ -182,6 +188,37 @@ class Api
             $user = $users->findById($iduser);
 
             $this->response(200, 'Updated successfully', $user);
+        } catch (Throwable $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
+    }
+
+    /**
+     * Gets the entire drink history from a user 
+     *
+     * @return void
+     */
+    public function usersHistory(): void
+    {
+        try {
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
+            }
+
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
+            }
+
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
+
+            $users = new Users();
+
+            $users->isTokenFromUser($token, $iduser);
+
+            $userHistory = Logs::getUserHistory($iduser);
+
+            $this->response(200, 'Success', $userHistory);
         } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
