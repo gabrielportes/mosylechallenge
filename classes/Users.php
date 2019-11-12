@@ -384,6 +384,30 @@ class Users
         WHERE 
             `iduser` = {$iduser};";
 
+        (new Connection())->queryExecute($query);
+
+        return $this->drinkLog($iduser, $drink_ml);
+    }
+
+    /**
+     * Saves a log each time a user drinks water
+     *
+     * @param  int $iduser
+     * @param  int $drink_ml
+     *
+     * @return bool
+     */
+    private function drinkLog(int $iduser, int $drink_ml): bool
+    {
+        $query = "INSERT INTO `logs` (
+            `iduser`,
+            `drink_ml`
+        )
+        VALUES (
+            {$iduser},
+            {$drink_ml}
+        );";
+
         return (new Connection())->queryExecute($query);
     }
 }
