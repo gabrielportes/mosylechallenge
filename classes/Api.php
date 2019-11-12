@@ -79,7 +79,7 @@ class Api
             $response = (new Users($email, $name, $password))->create();
 
             if ($response) {
-                $this->response(200, 'Success');
+                $this->response(201, 'Created successfully');
             }
         } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
@@ -94,13 +94,16 @@ class Api
     public function usersPut(): void
     {
         try {
-            if (isset($this->body['iduser'])) {
-                $iduser = $this->body['iduser'];
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
             }
 
-            if (isset($this->header['token'])) {
-                $token = $this->header['token'];
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
             }
+
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
 
             $users = new Users();
 
@@ -112,15 +115,43 @@ class Api
 
             $userUpdated = $users->findById($iduser, true);
 
-            $this->response(200, 'Success', $userUpdated);
+            $this->response(200, 'Updated successfully', $userUpdated);
         } catch (Throwable $e) {
             $this->response($e->getCode(), $e->getMessage());
         }
     }
 
+    /**
+     * Deletes a user from the system
+     *
+     * @return void
+     */
     public function usersDelete(): void
     {
-        echo 'usersDelete';
+        try {
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
+            }
+
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
+            }
+
+            $iduser = $this->body['iduser'];
+            $token = $this->header['token'];
+
+            $users = new Users();
+
+            $users->isTokenFromUser($token, $iduser);
+
+            $userDeleted = $users->findById($iduser, true);
+
+            $users->delete($iduser);
+
+            $this->response(200, 'Deleted successfully', $userDeleted);
+        } catch (Throwable $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -131,13 +162,16 @@ class Api
     public function loginPost(): void
     {
         try {
-            if (isset($this->body['email'])) {
-                $email = $this->body['email'];
+            if (empty($this->body['email'])) {
+                throw new Exception('Precondition Required: required request body content is missing "email"', 428);
             }
 
-            if (isset($this->body['password'])) {
-                $password = $this->body['password'];
+            if (empty($this->body['password'])) {
+                throw new Exception('Precondition Required: required request body content is missing "password"', 428);
             }
+
+            $email = $this->body['email'];
+            $password = $this->body['password'];
 
             $response = (new Users())->login($email, $password);
 
