@@ -366,4 +366,24 @@ class Users
 
         return (new Connection())->queryExecute($query);
     }
+
+    /**
+     * Changes how many times and how much water a user drinked
+     *
+     * @param  int $iduser
+     * @param  int $drink_ml
+     *
+     * @return bool
+     */
+    public function drink(int $iduser, int $drink_ml): bool
+    {
+        $query = "UPDATE
+            `users`
+        SET 
+            `drink_counter` = `drink_counter` + 1
+        WHERE 
+            `iduser` = {$iduser};";
+
+        return (new Connection())->queryExecute($query);
+    }
 }

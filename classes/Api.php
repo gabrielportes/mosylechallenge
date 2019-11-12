@@ -154,6 +154,39 @@ class Api
         }
     }
 
+    public function usersDrink(): void
+    {
+        try {
+            if (empty($this->body['iduser'])) {
+                throw new Exception('Precondition Required: required request body content is missing "iduser"', 428);
+            }
+
+            if (empty($this->body['drink_ml'])) {
+                throw new Exception('Precondition Required: required request body content is missing "drink_ml"', 428);
+            }
+
+            if (empty($this->header['token'])) {
+                throw new Exception('Precondition Required: required request header is missing "token"', 428);
+            }
+
+            $iduser = $this->body['iduser'];
+            $drink_ml = $this->body['drink_ml'];
+            $token = $this->header['token'];
+
+            $users = new Users();
+
+            $users->isTokenFromUser($token, $iduser);
+
+            $users->drink($iduser, $drink_ml);
+
+            $user = $users->findById($iduser);
+
+            $this->response(200, 'Updated successfully', $user);
+        } catch (Throwable $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
+    }
+
     /**
      * Sign in to the system
      *
