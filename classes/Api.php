@@ -225,6 +225,39 @@ class Api
     }
 
     /**
+     * Get the entire users ranking
+     *
+     * @return void
+     */
+    public function usersRanking(): void
+    {
+        try {
+
+            if (isset($this->header['token'])) {
+                $token = $this->header['token'];
+            }
+
+            if (empty($token)) {
+                throw new Exception('Token is necessary', 403);
+            }
+
+            $users = new Users();
+
+            if (!$users->findByToken($token)) {
+                throw new Exception('Invalid token', 401);
+            }
+
+            $response = Logs::getRanking();
+
+            if ($response) {
+                $this->response(200, 'Success', $response);
+            }
+        } catch (Throwable $e) {
+            $this->response($e->getCode(), $e->getMessage());
+        }
+    }
+
+    /**
      * Sign in to the system
      *
      * @return void
