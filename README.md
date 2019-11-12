@@ -21,6 +21,8 @@ pequena documentação das funcionalidades necessárias no projeto. Os desenvolvedo
 |**/users/:iduser**<br>(editar o seu próprio usuário)  | <span style="color:orange">**PUT**</span> | email<br>name<br>password  |   | token \*  |
 |**/users/:iduser**<br>(apagar o seu próprio usuário)  |   <span style="color:red">**DELETE**</span> |   |   | token \*  |
 | **/users/:iduser/drink**<br>(incrementar o contador de quantas vezes bebeu água)  | <span style="color:green">**POST**</span> | drink_ml (int)  |  iduser<br>email<br>name<br>drink_counter | token \*  |
+| **/users/:iduser/history**<br>(lista o histórico de registros de um usuário)  | <span style="color:blue">**GET**</span> |  | (array com todos registro que o usuário bebeu água) | token \*  |
+| **/users/ranking**<br>(lista o ranking do usuário que mais bebeu água hoje)  | <span style="color:blue">**GET**</span> |  | (array ranking de usuários que mais beberam água) | token \*  |
 
 \* Campos obrigatórios
 
