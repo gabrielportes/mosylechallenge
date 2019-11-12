@@ -1,6 +1,6 @@
 <?php
+error_reporting(E_ALL ^ E_NOTICE);
 require_once('Connection.php');
-
 class Users
 {
     private $name;
@@ -290,5 +290,59 @@ class Users
             `iduser` = {$iduser};";
 
         return (new Connection())->queryExecute($query);
+    }
+
+    /**
+     * Set parameters to use on Put action
+     *
+     * @param  array $body
+     *
+     * @return array
+     */
+    public function setParameters(array $body): array
+    {
+        $parameters = [];
+        if (isset($body['name'])) {
+            $parameters['name'] = $body['name'];
+        }
+
+        if (isset($body['email'])) {
+            if ($this->emailExists($body['email'])) {
+                throw new Exception('Email already taken.', 500);
+            }
+
+            $parameters['email'] = $body['email'];
+        }
+
+        if (isset($body['password'])) {
+            $parameters['password'] = $body['password'];
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * Check if token belongs to a user
+     *
+     * @param  string $token
+     * @param  int $iduser
+     *
+     * @return bool
+     */
+    public function isTokenFromUser(string $token, int $iduser): bool
+    {
+        if (!$this->findByToken($token)) {
+            throw new Exception('Invalid token', 401);
+        }
+
+        $user = $this->findById($iduser, true);
+
+        if ($user) {
+            if ($token != $user['token']) {
+                throw new Exception('Token does not belong to user', 403);
+            }
+        }
+
+        return true;
     }
 }

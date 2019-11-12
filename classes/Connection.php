@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_ALL ^ E_NOTICE);
 class Connection
 {
 
@@ -16,7 +16,7 @@ class Connection
 
         try {
             $this->PDO = new PDO($dsn, $this->user, $this->password);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->createSchema();
         }
     }
@@ -35,7 +35,7 @@ class Connection
             $this->queryExecute($schema);
 
             return $this->queryExecute('USE `mosylechallenge`;');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             throw new Exception("Database connection failed: '{$e->getMessage()}'", 500);
         }
     }
@@ -63,7 +63,7 @@ class Connection
             $this->PDO->commit();
 
             return true;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->PDO->rollBack();
             throw new Exception("Query failed to execute: '{$e->getMessage()}'", 500);
         }
@@ -89,7 +89,7 @@ class Connection
             $this->PDO->commit();
 
             return $result;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->PDO->rollBack();
             throw new Exception("Query failed to fetch: '{$e->getMessage()}'", 500);
         }
