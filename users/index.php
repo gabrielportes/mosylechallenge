@@ -37,6 +37,6 @@ switch ($requestMethod) {
         break;
 
     default:
-        $api->response(500, 'Requisition method not implemented');
+        $api->response(501, 'Requisition method not implemented');
         break;
 }
